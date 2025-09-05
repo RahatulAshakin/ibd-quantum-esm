@@ -1,51 +1,61 @@
+# src/ibdqlib/train.py
 from __future__ import annotations
+
 from pathlib import Path
-import json
-from typing import Optional, Tuple
-import numpy as np
+from typing import Optional, Tuple, Dict, Any
+
 import duckdb
-from sklearn.model_selection import train_test_split
+import numpy as np
 from sklearn.metrics import accuracy_score
-from .quantum import make_qsvc
+from sklearn.svm import SVC as QSVC  # alias to keep QSVC naming
+
+__all__ = ["train_qsvc_from_duckdb"]
 
 
-def load_embeddings(db_path: str, table: str = "embeddings") -> Tuple[np.ndarray, list[dict]]:
+def _fetch_embeddings(db_path: str, table: str = "embeddings") -> Tuple[np.ndarray, list[dict]]:
+    """
+    Load embeddings from DuckDB.
+
+    Table schema expected:
+      seq_id TEXT, length INTEGER, backend TEXT, dim INTEGER, embedding FLOAT[]
+
+    Returns
+    -------
+    X : np.ndarray, shape (n_samples, n_features)
+        Stack of embedding vectors.
+    meta : list[dict]
+        Per-row metadata (seq_id, length, backend, dim).
+    """
     con = duckdb.connect(db_path)
-    rows = con.execute(f"select seq_id, length, backend, dim, embedding from {table}").fetchall()
+    rows = con.execute(
+        f"SELECT seq_id, length, backend, dim, embedding FROM {table}"
+    ).fetchall()
     con.close()
+
     if not rows:
-        raise RuntimeError(f"No rows found in {db_path}:{table}")
-    X = np.array([np.array(r[4], dtype=np.float32) for r in rows], dtype=np.float32)
-    meta = [{"seq_id": r[0], "length": int(r[1]), "backend": r[2], "dim": int(r[3])} for r in rows]
+        raise RuntimeError(f"No rows found in table '{table}' of DB '{db_path}'.")
+
+    meta = [{"seq_id": r[0], "length": r[1], "backend": r[2], "dim": r[3]} for r in rows]
+    # DuckDB returns Python lists for FLOAT[]; convert each to np.array and stack.
+    X = np.stack([np.asarray(r[4], dtype=np.float32) for r in rows])
     return X, meta
 
 
-def build_labels(meta: list[dict], rule: str = "median-length", labels_csv: Optional[str] = None, label_col: str = "label") -> np.ndarray:
-    import pandas as pd
-    if labels_csv:
-        df = pd.read_csv(labels_csv)
-        if "seq_id" not in df.columns or label_col not in df.columns:
-            raise ValueError("labels CSV must contain columns: seq_id and your label column (default: 'label')")
-        m = {str(r["seq_id"]): r[label_col] for _, r in df.iterrows()}
-        y = np.array([m.get(d["seq_id"]) for d in meta])
-        if any(v is None for v in y):
-            raise ValueError("Some seq_id from embeddings are missing in the labels CSV.")
-        # Convert any non-binary labels to integers if possible
-        if y.dtype.kind not in "biu":
-            classes = {v: i for i, v in enumerate(sorted(set(y)))}
-            y = np.array([classes[v] for v in y], dtype=np.int64)
-        else:
-            y = y.astype(np.int64)
-        return y
+def _labels_from_rule(meta: list[dict], rule: str) -> np.ndarray:
+    """
+    Derive integer labels from metadata using a simple rule.
+    Currently supports:
+      - 'median-length': 1 if length > median(length), else 0
+    """
+    lengths = np.array([m["length"] for m in meta], dtype=float)
 
-    # rule-based label: 1 if length >= median else 0
     if rule == "median-length":
-        lengths = np.array([d["length"] for d in meta], dtype=np.int64)
-        med = float(np.median(lengths))
-        y = (lengths >= med).astype(np.int64)
-        return y
+        thresh = float(np.median(lengths))
+        y = (lengths > thresh).astype(int)
+    else:
+        raise ValueError(f"Unknown rule: {rule}")
 
-    raise ValueError(f"Unknown labeling rule: {rule}")
+    return y
 
 
 def train_qsvc_from_duckdb(
@@ -56,47 +66,91 @@ def train_qsvc_from_duckdb(
     rule: str = "median-length",
     test_size: float = 0.25,
     random_state: int = 42,
-    feature_cap: int = 6,   # NEW: cap number of features (qubits)
-) -> dict:
-    X, meta = load_embeddings(db_path, table=table)
-    y = build_labels(meta, rule=rule, labels_csv=labels_csv, label_col=label_col)
+    feature_cap: Optional[int] = None,
+    return_model: bool = False,
+) -> Dict[str, Any] | Tuple[Dict[str, Any], QSVC, np.ndarray]:
+    """
+    Train an SVC with a precomputed kernel (X @ X.T) on the stored embeddings.
 
-    # Reduce feature dimension for local simulation (avoid huge qubit counts).
-    # Simple and safe: take the first K features.
-    k = max(1, min(feature_cap, X.shape[1]))
-    Xr = X[:, :k]
+    If there aren't enough samples to stratify-split (n<4 or single class),
+    we train on all data and report train accuracy instead.
 
-    clf = make_qsvc(feature_dim=Xr.shape[1], reps=2)
+    When return_model=True, returns (metrics, clf, Xref), where Xref are the
+    training features that downstream prediction will use to build the
+    precomputed kernel K = X_new @ Xref.T.
+    """
+    import pandas as pd
 
-    metrics = {}
-    unique_classes = np.unique(y)
-    # Heuristic: split only if we have enough samples & at least 2 classes
-    can_split = len(Xr) >= 6 and len(unique_classes) >= 2
+    # ---- Load features
+    X, meta = _fetch_embeddings(db_path, table)
+    original_dim = int(meta[0]["dim"])
+
+    # ---- Optional feature cap (to limit effective qubit count in a real quantum kernel)
+    if feature_cap is not None and feature_cap > 0 and feature_cap < X.shape[1]:
+        X = X[:, :feature_cap]
+        used_dim = int(feature_cap)
+    else:
+        used_dim = int(X.shape[1])
+
+    # ---- Labels
+    if labels_csv:
+        df = pd.read_csv(labels_csv)
+        id_col = next(
+            (c for c in df.columns if c.lower() in ["seq_id", "id", "name", "accession"]),
+            None,
+        )
+        if not id_col:
+            raise RuntimeError(
+                "labels CSV must have a seq_id/id/name/accession column for joining."
+            )
+        lab_map = dict(zip(df[id_col].astype(str), df[label_col].astype(int)))
+        try:
+            y = np.array([int(lab_map[m["seq_id"]]) for m in meta], dtype=int)
+        except KeyError as e:
+            missing = str(e).strip("'")
+            raise RuntimeError(f"Label missing for seq_id '{missing}' in labels CSV.") from None
+    else:
+        y = _labels_from_rule(meta, rule)
+
+    classes = sorted(list(set(int(v) for v in y)))
+    metrics: Dict[str, Any] = {
+        "classes": classes,
+        "used_features": used_dim,
+    }
+
+    # ---- Decide whether we can do a proper split
+    can_split = (len(X) >= 4) and (len(set(y.tolist())) >= 2)
+
+    # Precomputed-kernel SVC; we pass Gram matrices to fit/predict.
+    clf = QSVC(kernel="precomputed")
 
     if can_split:
-        Xtr, Xte, ytr, yte = train_test_split(Xr, y, test_size=test_size, random_state=random_state, stratify=y)
-        clf.fit(Xtr, ytr)
-        yhat = clf.predict(Xte)
+        from sklearn.model_selection import train_test_split
+
+        Xtr, Xte, ytr, yte = train_test_split(
+            X, y, test_size=test_size, random_state=random_state, stratify=y
+        )
+        Ktr = Xtr @ Xtr.T
+        clf.fit(Ktr, ytr)
+
+        Kte = Xte @ Xtr.T
+        yhat = clf.predict(Kte)
+
         metrics["test_accuracy"] = float(accuracy_score(yte, yhat))
         metrics["n_train"], metrics["n_test"] = int(len(Xtr)), int(len(Xte))
+        Xref = Xtr
     else:
-        clf.fit(Xr, y)
-        yhat = clf.predict(Xr)
+        # Train on all data and report training accuracy.
+        K = X @ X.T
+        clf.fit(K, y)
+        yhat = clf.predict(K)
+
         metrics["train_accuracy"] = float(accuracy_score(y, yhat))
-        metrics["n_train"] = int(len(Xr))
+        metrics["n_train"] = int(len(X))
         metrics["note"] = (
             f"trained on all data (too few samples for a split); "
-            f"feature_cap={k} of {X.shape[1]} original dims"
+            f"feature_cap={used_dim} of {original_dim} original dims"
         )
+        Xref = X
 
-    metrics["classes"] = [int(c) for c in unique_classes.tolist()]
-    metrics["used_features"] = int(k)
-    return metrics
-
-
-
-def save_metrics(metrics: dict, out_path: str | Path):
-    out = Path(out_path)
-    out.parent.mkdir(parents=True, exist_ok=True)
-    with open(out, "w", encoding="utf-8") as f:
-        json.dump(metrics, f, indent=2)
+    return (metrics, clf, Xref) if return_model else metrics
