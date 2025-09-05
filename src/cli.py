@@ -150,3 +150,31 @@ def query_cmd(
     finally:
         con.close()
 
+
+
+
+
+
+
+from .ibdqlib.train import train_qsvc_from_duckdb, save_metrics
+
+@app.command("train-qsvc")
+def train_qsvc_cmd(
+    db: str = typer.Option("results/duckdb/embeddings.duckdb", "--db", help="DuckDB path"),
+    table: str = typer.Option("embeddings", "--table", help="DuckDB table"),
+    labels_csv: Optional[str] = typer.Option(None, "--labels-csv", help="CSV with columns: seq_id,label"),
+    label_col: str = typer.Option("label", "--label-col", help="Label column name in CSV"),
+    rule: str = typer.Option("median-length", "--rule", help="Labeling rule if no CSV provided"),
+    out: str = typer.Option("results/metrics/qsvc.json", "--out", help="Where to write metrics JSON"),
+    feature_cap: int = typer.Option(6, "--feature-cap", help="Max features (qubits) to use; keeps local sim small"),
+):
+    """
+    Train a QSVC on embeddings and write a small metrics JSON.
+    If --labels-csv is omitted, labels are derived via --rule (default: median-length).
+    """
+    metrics = train_qsvc_from_duckdb(
+        db, table=table, labels_csv=labels_csv, label_col=label_col, rule=rule, feature_cap=feature_cap
+    )
+    save_metrics(metrics, out)
+    typer.secho(f"Wrote metrics to {out}: {metrics}", fg=typer.colors.GREEN)
+
