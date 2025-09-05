@@ -1,0 +1,22 @@
+name: ibd-quantum-esm
+channels: [conda-forge, pytorch]
+dependencies:
+  - python=3.10
+  - numpy
+  - pandas
+  - scikit-learn
+  - pyarrow
+  - duckdb
+  - faiss-cpu
+  - matplotlib
+  - pytest
+  - pip
+  - pytorch
+  - pip:
+      - qiskit
+      - qiskit-ibm-runtime
+      - qiskit-machine-learning
+      - typer[all]
+      - python-dotenv
+      - fair-esm
+      - biopython
