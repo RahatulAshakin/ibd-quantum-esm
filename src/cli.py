@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import os
 from pathlib import Path
 from typing import Optional
@@ -7,6 +8,7 @@ import typer
 import pandas as pd
 import duckdb
 
+from .ibdqlib.runtime import list_backends
 from .ibdqlib.esm_embed import get_embedder, read_fasta
 
 
@@ -100,6 +102,29 @@ def embed_cmd(
         f"Inserted {len(df)} rows into {out_path} (table: embeddings) using backend='{backend}', dim={dim}.",
         fg=typer.colors.GREEN,
     )
+
+
+
+@app.command("runtime-test")
+def runtime_test_cmd(
+    limit: int = typer.Option(10, "--limit", help="Number of backends to list")
+) -> None:
+    """
+    Smoke test IBM Runtime credentials: lists a few backends.
+    Does NOT submit any jobs.
+    """
+    try:
+        rows = list_backends(limit=limit)
+    except Exception as e:
+        typer.secho(f"IBM Runtime auth failed: {e}", fg=typer.colors.RED)
+        raise typer.Exit(code=1)
+
+    typer.secho(f"Found {len(rows)} backend(s):", fg=typer.colors.GREEN)
+    for name, n_qubits, is_sim in rows:
+        typer.echo(f"- {name:20s}  qubits={n_qubits:>3}  simulator={is_sim}")
+
+
+
 
 if __name__ == "__main__":
     app()
