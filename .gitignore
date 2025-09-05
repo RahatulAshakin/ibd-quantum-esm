@@ -10,3 +10,4 @@ results/duckdb/*.duckdb
 !data/.gitkeep
 !results/.gitkeep
 !results/duckdb/.gitkeep
+results/structures/
