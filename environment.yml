@@ -16,6 +16,7 @@ dependencies:
       - qiskit
       - qiskit-ibm-runtime
       - qiskit-machine-learning
+      - qiskit-algorithms 
       - typer[all]
       - python-dotenv
       - fair-esm

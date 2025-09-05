@@ -4,3 +4,9 @@ __pycache__/
 .ipynb_checkpoints/
 data/
 results/duckdb/*.duckdb
+
+
+# keep placeholders for empty dirs
+!data/.gitkeep
+!results/.gitkeep
+!results/duckdb/.gitkeep
