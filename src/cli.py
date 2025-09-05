@@ -12,6 +12,8 @@ from .ibdqlib.runtime import list_backends
 from .ibdqlib.esm_embed import get_embedder, read_fasta
 
 
+
+
 app = typer.Typer(help="IBD Quantum + ESM pipeline")
 
 @app.command("hello")
@@ -29,9 +31,16 @@ def version_cmd() -> None:
 def embed_cmd(
     input: str = typer.Argument(..., help="Path to FASTA (.fa/.fasta) or CSV file"),
     outdb: str = typer.Option("results/duckdb/embeddings.duckdb", "--outdb", help="DuckDB database file"),
-    model: str = typer.Option("esm2_t6_8M_UR50D", "--model", help="ESM model name; falls back to dummy if not available"),
-    batch: int = typer.Option(64, "--batch", help="Batch size for ESM embedding"),
+    backend: str = typer.Option(
+        "dummy",
+        "--backend",
+        help="Embedding backend: 'dummy' or 'esm2_t6_8M_UR50D'",
+    ),
+    batch: int = typer.Option(64, "--batch", help="Batch size for embedding"),
 ):
+
+
+
     """
     Embed protein sequences and store vectors in DuckDB (table: embeddings).
     CSV must contain a 'sequence' column; ID is taken from 'id'/'seq_id'/'name' if present,
@@ -62,7 +71,14 @@ def embed_cmd(
         typer.secho("No sequences found.", fg=typer.colors.RED, err=True)
         raise typer.Exit(code=2)
 
-    embed_fn, dim, backend = get_embedder(model)
+    embed_fn, dim, backend_used = get_embedder(backend)
+
+
+
+# pause #
+
+
+
 
     # ---- batch embed ----
     import numpy as np
