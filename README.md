@@ -97,8 +97,64 @@ python -m src train-qsvc-quantum --db results/duckdb/ibd.duckdb --table embeddin
 
         python -m src train-qsvc-quantum --db results/duckdb/uniprot.duckdb --table embeddings_ec12 --labels-csv data/labels_ec12.csv --label-col ec_top --pca-components 4 --angle-scale-grid 0.5 --angle-scale-grid 1.0 --reps-grid 1 --reps-grid 2 --entanglement-grid linear --entanglement-grid full --per-class-limit 120 --C 10 --test-size 0.2 --random-state 123 --out results/metrics/final_qsvc_quantum_ec12.json --model-out results/models/final_qsvc_quantum_ec12.joblib
 
+### Real-time service integrations
+
+#### IBM Quantum Runtime (hardware runs)
+
+1. Create a `.env` in the project root (or extend your existing one) with:
+
+   ```
+   QISKIT_IBM_TOKEN=your_long_api_token
+   QISKIT_IBM_INSTANCE=ibm-q/open/main
+   QISKIT_IBM_CHANNEL=ibm_cloud
+   ```
+
+2. Run inside an environment that sticks to the pre-1.0 Qiskit stack (no 1.x or 2.x packages):
+
+   ```bash
+   conda deactivate
+   conda create -n qiskit045 python=3.10
+   conda activate qiskit045
+   pip install "qiskit==0.45.5" "qiskit-machine-learning==0.6.0" "qiskit-ibm-runtime==0.20.0"
+   pip install duckdb pandas scikit-learn python-dotenv typer matplotlib fair-esm biopython
+   ```
+
+3. Verify credentials and entitlement before sending hardware jobs:
+
+   ```bash
+   python -m src runtime-test
+   ```
+
+4. Submit the hardware sweep (adjust backend, shots, or grid as needed):
+
+   ```bash
+   python -m src train-qsvc-quantum \
+       --db results/duckdb/uniprot.duckdb --table embeddings_ec12 \
+       --labels-csv data/labels_ec12.csv --label-col ec_top \
+       --pca-components 4 \
+       --angle-scale-grid 0.5 --angle-scale-grid 1.0 \
+       --reps-grid 1 --reps-grid 2 \
+       --entanglement-grid linear --entanglement-grid full \
+       --per-class-limit 120 --C 10 --test-size 0.2 --random-state 123 \
+       --backend ibm_brisbane --shots 8192 \
+       --out results/metrics/final_qsvc_quantum_ibm.json \
+       --model-out results/models/final_qsvc_quantum_ibm.joblib \
+       --pred-out results/predictions_final_qsvc_quantum_ibm.csv
+   ```
+
+   Log the backend, job ID, queue time, and metrics from `results/metrics/final_qsvc_quantum_ibm.json` so the hardware run can be cited alongside the simulator baseline.
+
+#### ESM Atlas (live folding)
+
+```bash
+python -m src fold data/train.fa --limit 4 --sanitize --delay 15
+```
+
+- The public Atlas API is rate limited and rejects non-canonical residues; use `--sanitize` to replace rare tokens with `X` and increase `--delay` if you encounter HTTP 429 responses.
+- Successful calls create PDBs under `results/structures/`. Log sequence IDs, run dates, and retries so downstream users know which structures originate from the live service.
 > Note: The embeddings_ec12 DuckDB table and data/labels_ec12.csv helper file are derived from the provided UniProt dataset; regenerate them with the helper script in scripts/prep_uniprot_ec.py if needed.
 
 > Optional: To reproduce the synthetic demo, rerun step 2 with data/ibd_multiomics_synthetic.csv and the original synthetic output paths (yields the toy F1 ≈ 1.0).
+
 
 
