@@ -1,0 +1,3 @@
+label,dietary_fiber_g,scfa_butyrate_mM,scfa_acetate_mM,host_gene_IL8_logtpm,host_gene_IFNG_logtpm,microbe_e_coli_rel_abund,microbe_faecalibacterium_rel_abund,metabolite_tryptophan_uM,metabolite_bile_acid_uM,metabolite_butyrate_uM,microbe_bifido_rel_abund,host_gene_TNFA_logtpm,dietary_omega3_g
+flare,11.881246,0.45078123,1.0365909,2.5102425,1.9162762,0.55222446,0.18675193,8.538222,3.3111854,1.4965589,0.12182132,2.2225401,0.80047494
+remission,26.133856,1.207384,1.9510492,1.0409849,0.6175725,0.18286167,0.42314425,12.757184,1.0884012,3.201243,0.2837569,0.88487726,1.5820241

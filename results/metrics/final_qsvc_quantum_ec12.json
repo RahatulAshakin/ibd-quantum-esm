@@ -1,0 +1,41 @@
+{
+  "used_features": 4,
+  "classes": [
+    1,
+    2
+  ],
+  "n_train": 192,
+  "n_test": 48,
+  "quantum_accuracy": 0.6041666666666666,
+  "quantum_precision_macro": 0.6058201058201058,
+  "quantum_recall_macro": 0.6041666666666666,
+  "quantum_f1_macro": 0.6026143790849673,
+  "quantum_balanced_accuracy": 0.6041666666666666,
+  "baseline_accuracy": 0.7083333333333334,
+  "baseline_precision_macro": 0.734375,
+  "baseline_recall_macro": 0.7083333333333333,
+  "baseline_f1_macro": 0.7,
+  "accuracy_delta": -0.10416666666666674,
+  "best_params": {
+    "angle_scale": 1.0,
+    "reps": 2,
+    "entanglement": "full"
+  },
+  "kernel_diagnostics": {
+    "backend": "statevector",
+    "shots": 1024,
+    "angle_grid": [
+      0.5,
+      1.0
+    ],
+    "reps_grid": [
+      1,
+      2
+    ],
+    "entanglement_grid": [
+      "linear",
+      "full"
+    ],
+    "candidates_tested": 8
+  }
+}

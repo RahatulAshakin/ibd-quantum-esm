@@ -1,0 +1,5 @@
+,flare,remission,accuracy,macro avg,weighted avg
+precision,1.0,1.0,1.0,1.0,1.0
+recall,1.0,1.0,1.0,1.0,1.0
+f1-score,1.0,1.0,1.0,1.0,1.0
+support,120.0,120.0,1.0,240.0,240.0

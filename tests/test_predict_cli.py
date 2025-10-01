@@ -1,9 +1,10 @@
 import json
 import os
 import subprocess
+import sys
 from pathlib import Path
 
-PY = "python"  # CI will resolve the env's python
+PY = f'"{sys.executable}"'
 
 def run(cmd, cwd=None):
     return subprocess.run(cmd, shell=True, capture_output=True, text=True, cwd=cwd)

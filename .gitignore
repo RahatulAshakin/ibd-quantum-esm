@@ -2,12 +2,30 @@
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
+.vscode/
+.venv/
 data/
 results/duckdb/*.duckdb
-
 
 # keep placeholders for empty dirs
 !data/.gitkeep
 !results/.gitkeep
 !results/duckdb/.gitkeep
+
+# curated results to retain
+!results/figures_final*/
+!results/figures_final*/**
+!results/tables_final*/
+!results/tables_final*/**
+
+# generated outputs to ignore
 results/structures/
+results/figures/
+results/tables/
+results/metrics/
+!results/metrics/final_*.json
+results/models/
+!results/models/final_*.joblib
+!results/models/final_*.joblib.preds.csv
+results/predictions*.csv
+!results/predictions_final_*.csv

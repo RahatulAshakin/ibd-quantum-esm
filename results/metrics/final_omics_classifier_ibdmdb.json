@@ -1,0 +1,236 @@
+{
+  "classes": [
+    "control",
+    "flare",
+    "remission"
+  ],
+  "n_samples": 769,
+  "cv_splits": 5,
+  "accuracy": 0.8244473342002601,
+  "balanced_accuracy": 0.8109502822237685,
+  "precision_macro": 0.7868285415560164,
+  "recall_macro": 0.8109502822237685,
+  "f1_macro": 0.7970084921905133,
+  "precision_weighted": 0.8330985401303381,
+  "recall_weighted": 0.8244473342002601,
+  "f1_weighted": 0.8268819785814483,
+  "roc_auc_ovr": 0.9273222124584191,
+  "average_precision": 0.8688345199279092,
+  "confusion_matrix": {
+    "labels": [
+      "control",
+      "flare",
+      "remission"
+    ],
+    "matrix": [
+      [
+        164,
+        1,
+        35
+      ],
+      [
+        11,
+        70,
+        9
+      ],
+      [
+        57,
+        22,
+        400
+      ]
+    ]
+  },
+  "classification_report": {
+    "control": {
+      "precision": 0.7068965517241379,
+      "recall": 0.82,
+      "f1-score": 0.7592592592592593,
+      "support": 200.0
+    },
+    "flare": {
+      "precision": 0.7526881720430108,
+      "recall": 0.7777777777777778,
+      "f1-score": 0.7650273224043715,
+      "support": 90.0
+    },
+    "remission": {
+      "precision": 0.9009009009009009,
+      "recall": 0.8350730688935282,
+      "f1-score": 0.866738894907909,
+      "support": 479.0
+    },
+    "accuracy": 0.8244473342002601,
+    "macro avg": {
+      "precision": 0.7868285415560164,
+      "recall": 0.8109502822237685,
+      "f1-score": 0.7970084921905133,
+      "support": 769.0
+    },
+    "weighted avg": {
+      "precision": 0.8330985401303381,
+      "recall": 0.8244473342002601,
+      "f1-score": 0.8268819785814483,
+      "support": 769.0
+    }
+  },
+  "fold_metrics": [
+    {
+      "fold": 0,
+      "accuracy": 0.8311688311688312,
+      "balanced_accuracy": 0.8004052684903749,
+      "f1_macro": 0.7924635776098148
+    },
+    {
+      "fold": 1,
+      "accuracy": 0.7922077922077922,
+      "balanced_accuracy": 0.8206843206843205,
+      "f1_macro": 0.7724099885522593
+    },
+    {
+      "fold": 2,
+      "accuracy": 0.8506493506493507,
+      "balanced_accuracy": 0.8549469604243166,
+      "f1_macro": 0.8375960956606118
+    },
+    {
+      "fold": 3,
+      "accuracy": 0.7922077922077922,
+      "balanced_accuracy": 0.745879851143009,
+      "f1_macro": 0.7508593791316306
+    },
+    {
+      "fold": 4,
+      "accuracy": 0.8562091503267973,
+      "balanced_accuracy": 0.8344139333841851,
+      "f1_macro": 0.8280311063980205
+    }
+  ],
+  "top_features": {
+    "control": [
+      {
+        "feature": "mgx_k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Blautia|s__Ruminococcus_torques",
+        "weight": 1.0685036063958748
+      },
+      {
+        "feature": "mgx_k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Morganellaceae|g__Proteus|s__Proteus_mirabilis",
+        "weight": 1.0418587160243749
+      },
+      {
+        "feature": "mgx_k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Bacteroidaceae|g__Bacteroides|s__Bacteroides_faecis_CAG_32",
+        "weight": 0.8278911362224195
+      },
+      {
+        "feature": "mgx_k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Bacteroidaceae|g__Bacteroides|s__Bacteroides_eggerthii",
+        "weight": 0.7955812692844404
+      },
+      {
+        "feature": "mgx_k__Bacteria|p__Proteobacteria|c__Gammaproteobacteria|o__Enterobacterales|f__Enterobacteriaceae|g__Klebsiella|s__Klebsiella_quasipneumoniae",
+        "weight": 0.6892542457351597
+      },
+      {
+        "feature": "mgx_k__Bacteria|p__Firmicutes|c__Negativicutes|o__Acidaminococcales|f__Acidaminococcaceae|g__Phascolarctobacterium|s__Phascolarctobacterium_succinatutens",
+        "weight": 0.6216765850134671
+      },
+      {
+        "feature": "mgx_k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Propionibacteriales|f__Propionibacteriaceae|g__Cutibacterium|s__Cutibacterium_acnes",
+        "weight": 0.6010028507789202
+      },
+      {
+        "feature": "mgx_k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Rikenellaceae|g__Alistipes|s__Alistipes_putredinis",
+        "weight": 0.5508630006252677
+      },
+      {
+        "feature": "mgx_k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Ruminococcaceae|g__Ruminococcus|s__Ruminococcus_lactaris",
+        "weight": 0.5315785660994415
+      },
+      {
+        "feature": "mgx_k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Bifidobacteriales|f__Bifidobacteriaceae|g__Bifidobacterium|s__Bifidobacterium_breve",
+        "weight": 0.4590705166639127
+      }
+    ],
+    "flare": [
+      {
+        "feature": "hbi",
+        "weight": 2.8193059176692454
+      },
+      {
+        "feature": "sccai",
+        "weight": 1.6993460615885956
+      },
+      {
+        "feature": "mtx_UNINTEGRATED|g__Prevotella.s__Prevotella_sp_885",
+        "weight": 0.5413009667205501
+      },
+      {
+        "feature": "mgx_k__Bacteria|p__Actinobacteria|c__Coriobacteriia|o__Coriobacteriales|f__Coriobacteriaceae|g__Collinsella|s__Collinsella_aerofaciens",
+        "weight": 0.4811272447923948
+      },
+      {
+        "feature": "mgx_k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Roseburia|s__Roseburia_inulinivorans",
+        "weight": 0.40023510815988655
+      },
+      {
+        "feature": "mgx_k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Fusicatenibacter|s__Fusicatenibacter_saccharivorans",
+        "weight": 0.3971243354211149
+      },
+      {
+        "feature": "mgx_k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Clostridiaceae|g__Clostridium|s__Clostridium_bolteae_CAG_59",
+        "weight": 0.3776486358991347
+      },
+      {
+        "feature": "mtx_UNINTEGRATED|g__Dorea.s__Dorea_longicatena",
+        "weight": 0.375219615575935
+      },
+      {
+        "feature": "mtx_UNINTEGRATED|g__Catenibacterium.s__Catenibacterium_mitsuokai",
+        "weight": 0.3685172761245182
+      },
+      {
+        "feature": "mgx_k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Prevotellaceae|g__Prevotella|s__Prevotella_sp_885",
+        "weight": 0.36186327505402394
+      }
+    ],
+    "remission": [
+      {
+        "feature": "mtx_UNINTEGRATED|g__Klebsiella.s__Klebsiella_pneumoniae",
+        "weight": 0.6229756621872868
+      },
+      {
+        "feature": "mgx_k__Bacteria|p__Firmicutes|c__Negativicutes|o__Veillonellales|f__Veillonellaceae|g__Veillonella|s__Veillonella_seminalis",
+        "weight": 0.6067309067345863
+      },
+      {
+        "feature": "mgx_k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Prevotellaceae|g__Prevotella|s__Prevotella_stercorea",
+        "weight": 0.5355395079776561
+      },
+      {
+        "feature": "mgx_k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Prevotellaceae|g__Prevotella|s__Prevotella_sp_885",
+        "weight": 0.5335896225038487
+      },
+      {
+        "feature": "mgx_k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Lachnospiraceae|g__Dorea|s__Dorea_longicatena",
+        "weight": 0.5280645807843667
+      },
+      {
+        "feature": "mgx_k__Bacteria|p__Bacteroidetes|c__Bacteroidia|o__Bacteroidales|f__Bacteroidaceae|g__Bacteroides|s__Bacteroides_sp_43_108",
+        "weight": 0.4995747940807599
+      },
+      {
+        "feature": "mtx_UNINTEGRATED|g__Bifidobacterium.s__Bifidobacterium_longum",
+        "weight": 0.49861714523784756
+      },
+      {
+        "feature": "mtx_UNINTEGRATED|g__Bacteroides.s__Bacteroides_dorei",
+        "weight": 0.49148880424445274
+      },
+      {
+        "feature": "mtx_UNINTEGRATED|g__Bifidobacterium.s__Bifidobacterium_bifidum",
+        "weight": 0.48430203619897433
+      },
+      {
+        "feature": "mgx_k__Bacteria|p__Firmicutes|c__Clostridia|o__Clostridiales|f__Clostridiaceae|g__Clostridium|s__Clostridium_bolteae_CAG_59",
+        "weight": 0.47416492770058066
+      }
+    ]
+  }
+}
